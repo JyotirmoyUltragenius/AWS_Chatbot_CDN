@@ -22,10 +22,10 @@ def chat_with_gpt(prompt):
     )
     return response.choices[0].message.content 
 
-# Initialize session state if not already done
 if "responses" not in st.session_state:
     st.session_state["responses"] = {}
     st.session_state["current_question"] = "What will you be using CloudFront for?"
+    st.session_state["completed"] = False
 
 # Define question dictionary
 question_flow = {
@@ -74,20 +74,21 @@ question_flow = {
 st.title("CloudFront Configuration Chatbot")
 st.write("This chatbot will dynamically guide you through CloudFront configuration.")
 
-question = st.session_state["current_question"]
-user_input = st.text_input(question, key="current")
-
-if st.button("Next") and user_input:
-    # Store response
-    st.session_state["responses"][question] = user_input
+if not st.session_state["completed"]:
+    question = st.session_state["current_question"]
+    user_input = st.text_input(question, key="current")
     
-    # Determine next question dynamically
-    if question in question_flow and user_input in question_flow[question]:
-        st.session_state["current_question"] = question_flow[question][user_input]
-    else:
-        st.session_state["current_question"] = "Would you like to optimize your CloudFront configuration further? (Yes/No)"
-    
-    st.experimental_rerun()
+    if st.button("Next") and user_input:
+        # Store response
+        st.session_state["responses"][question] = user_input
+        
+        # Determine next question dynamically
+        if question in question_flow and user_input in question_flow[question]:
+            st.session_state["current_question"] = question_flow[question][user_input]
+        else:
+            st.session_state["completed"] = True
+        
+        st.rerun()
 else:
     st.write("### Configuration Summary:")
     st.json(st.session_state["responses"])
@@ -96,5 +97,9 @@ else:
     with open("cloudfront_config.json", "w") as f:
         json.dump(st.session_state["responses"], f, indent=4)
     st.success("Configuration saved as cloudfront_config.json")
-
-# To run locally, use: `streamlit run app.py`
+    
+    if st.button("Restart Configuration"):
+        st.session_state["responses"] = {}
+        st.session_state["current_question"] = "What will you be using CloudFront for?"
+        st.session_state["completed"] = False
+        st.rerun()
