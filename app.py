@@ -20,7 +20,7 @@ def chat_with_gpt(prompt):
         messages=[{"role": "system", "content": "You are a CloudFront configuration assistant."},
                   {"role": "user", "content": prompt}]
     )
-  return response.choices[0].message.content 
+     return response.choices[0].message.content 
 
 # Initialize session state if not already done
 if "responses" not in st.session_state:
