@@ -127,17 +127,17 @@ if user_input:
     st.session_state.chat_history.append({"role": "user", "content": user_input})
 st.session_state.messages.append({"role": "user", "content": user_input})
     
-    response = openai.chat.completions.create(
+response = openai.chat.completions.create(
         model="gpt-4",
         messages=st.session_state.messages,
         functions=functions
     )
     
-    message_dict = response.choices[0].message.model_dump()
+message_dict = response.choices[0].message.model_dump()
     
-    if message_dict.get("function_call") is not None:
+if message_dict.get("function_call") is not None:
         function_call = message_dict["function_call"]
-        if function_call["name"] == "collect_cdn_technical_info":
+    if function_call["name"] == "collect_cdn_technical_info":
             user_info = json.loads(function_call["arguments"])
             
             output = {
