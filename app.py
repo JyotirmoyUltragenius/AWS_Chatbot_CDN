@@ -16,7 +16,7 @@ openai.api_key = api_key
 
 def get_chatgpt_response(user_input):
     """Fetch response from ChatGPT API based on user input."""
-    response = openai.chats.completions.create(
+    response = openai.chat.completions.create(
         model="gpt-4",
         messages=[
             {
