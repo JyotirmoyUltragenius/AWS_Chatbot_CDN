@@ -75,7 +75,7 @@ def get_chatgpt_response(user_input):
             {"role": "user", "content": user_input},
         ],
     )
-    return response.choices[0].message.content 
+    return response.choices.message.content 
 
 
 def collect_user_info():
