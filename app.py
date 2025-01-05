@@ -11,7 +11,8 @@ else:
     print("API Key not found!")
 
 # Initialize OpenAI API key
-openai.api_key =api_key
+openai.api_key = api_key
+
 functions = [
     {
         "name": "collect_cdn_technical_info",
@@ -98,7 +99,7 @@ functions = [
 messages = [
     {
         "role": "system",
-        "content": "You are an intelligent data-collecting chatbot designed to interact with users to gather information on at least 10 key parameters. Guide the user through a structured conversation,ask questions one by one, ensuring that all necessary details are collected. The final output should be formatted in JSON, optimized for use with Amazon CloudFront CDN."
+        "content": "You are an intelligent data-collecting chatbot designed to interact with users to gather information on at least 10 key parameters. Guide the user through a structured conversation, ask questions one by one, ensuring that all necessary details are collected. The final output should be formatted in JSON, optimized for use with Amazon CloudFront CDN."
     }
 ]
 
@@ -117,9 +118,8 @@ user_input = st.chat_input("Type your message here...")
 if user_input:
     st.session_state.messages.append({"role": "user", "content": user_input})
     st.session_state.chat_history.append({"role": "user", "content": user_input})
-st.session_state.messages.append({"role": "user", "content": user_input})
     
-response = openai.chat.completions.create(
+    response = openai.chat.completions.create(
         model="gpt-4",
         messages=messages,
         functions=functions
@@ -150,4 +150,3 @@ response = openai.chat.completions.create(
     st.session_state.chat_history.append({"role": "assistant", "content": response_text})
     with st.chat_message("assistant"):
         st.markdown(response_text)
-
