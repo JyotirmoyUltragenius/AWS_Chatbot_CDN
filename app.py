@@ -96,10 +96,11 @@ functions = [
 ]
 
 # Define system message
+# Define system message
 messages = [
     {
         "role": "system",
-        "content": "You are an intelligent data-collecting chatbot designed to interact with users to gather information on at least 10 key parameters. Guide the user through a structured conversation, ask questions one by one, ensuring that all necessary details are collected. The final output should be formatted in JSON, optimized for use with Amazon CloudFront CDN."
+        "content": "You are an intelligent data-collecting chatbot designed to interact with users to gather information on at least 10 key parameters. Guide the user through a structured conversation, ensuring that all necessary details are collected. The final output should be formatted in JSON, optimized for use with Amazon CloudFront CDN."
     }
 ]
 
@@ -107,6 +108,12 @@ st.title("CDN Optimization Chatbot")
 st.write("Chat with this AI to collect CDN deployment requirements.")
 
 if 'chat_history' not in st.session_state:
+    st.session_state.chat_history = []
+if 'messages' not in st.session_state:
+    st.session_state.messages = []
+    st.session_state.chat_history = []
+if 'messages' not in st.session_state:
+    st.session_state.messages = messages
     st.session_state.chat_history = []
 
 for message in st.session_state.chat_history:
@@ -118,10 +125,11 @@ user_input = st.chat_input("Type your message here...")
 if user_input:
     st.session_state.messages.append({"role": "user", "content": user_input})
     st.session_state.chat_history.append({"role": "user", "content": user_input})
+st.session_state.messages.append({"role": "user", "content": user_input})
     
     response = openai.chat.completions.create(
         model="gpt-4",
-        messages=messages,
+        messages=st.session_state.messages,
         functions=functions
     )
     
@@ -148,5 +156,7 @@ if user_input:
         response_text = message_dict["content"]
     
     st.session_state.chat_history.append({"role": "assistant", "content": response_text})
+st.session_state.messages.append({"role": "assistant", "content": response_text})
     with st.chat_message("assistant"):
         st.markdown(response_text)
+
