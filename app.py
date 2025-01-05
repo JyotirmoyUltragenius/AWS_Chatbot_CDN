@@ -1,11 +1,4 @@
-import streamlit as st
-import openai
-import json
-from datetime import datetime
-
-api_key = str(st.secrets["API_KEY"].strip())
-if api_key:
-    print(f"API Key: {api_key}")import openai
+)import openai
 import json
 import streamlit as st
 from datetime import datetime
