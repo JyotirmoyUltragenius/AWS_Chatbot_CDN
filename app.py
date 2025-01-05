@@ -136,9 +136,9 @@ response = openai.chat.completions.create(
 message_dict = response.choices[0].message.model_dump()
     
 if message_dict.get("function_call") is not None:
-        function_call = message_dict["function_call"]
+     function_call = message_dict["function_call"]
     if function_call["name"] == "collect_cdn_technical_info":
-            user_info = json.loads(function_call["arguments"])
+         user_info = json.loads(function_call["arguments"])
             
             output = {
                 "user_info": user_info,
