@@ -1,7 +1,7 @@
 import streamlit as st
 import openai
 import json
-import os
+from datetime import datetime
 
 api_key = str(st.secrets["API_KEY"].strip())
 if api_key:
@@ -13,93 +13,95 @@ else:
 # Initialize OpenAI API key
 openai.api_key =api_key
 
-# Function to call ChatGPT API
-def chat_with_gpt(prompt):
-    response = openai.chat.completions.create(
+
+def get_chatgpt_response(user_input):
+    """Fetch response from ChatGPT API based on user input."""
+    response = openai.chats.completions.create(
         model="gpt-4",
-        messages=[{"role": "system", "content": "You are a CloudFront configuration assistant."},
-                  {"role": "user", "content": prompt}]
-    )
-    return response.choices[0].message.content 
+        messages=[{"role": "system", "content": '''You are an intelligent data-collecting chatbot designed to interact with users to gather information on at least 10 key parameters. You will guide the user through a structured conversation, ensuring that all necessary details are collected. The final output should be formatted in JSON, optimized for use with Amazon CloudFront CDN.
 
-if "responses" not in st.session_state:
-    st.session_state["responses"] = {}
-    st.session_state["current_question"] = "What will you be using CloudFront for?"
-    st.session_state["completed"] = False
-
-# Define question dictionary
-question_flow = {
-    "What will you be using CloudFront for?": {
-        "Static Content": "Where is your static content hosted? (S3, EC2, on-prem, other cloud provider)",
-        "Dynamic Content": "What type of dynamic content will you serve? (API responses, personalized content, database queries)",
-        "Streaming": "Are you delivering live or on-demand streaming? (Live, On-Demand)",
-        "Mixed": "Do you want to configure separate settings for different content types? (Yes/No)"
-    },
-    "Where is your static content hosted? (S3, EC2, on-prem, other cloud provider)": {
-        "S3": "Do you need Origin Access Control (OAC)? (Yes/No)",
-        "EC2": "Do you want to enable automatic scaling for EC2? (Yes/No)"
-    },
-    "What type of dynamic content will you serve? (API responses, personalized content, database queries)": {
-        "API responses": "Do you need caching for API responses? (Yes/No)",
-        "Personalized content": "Do you require session stickiness? (Yes/No)"
-    },
-    "Are you delivering live or on-demand streaming? (Live, On-Demand)": {
-        "Live": "Do you need low-latency streaming? (Yes/No)",
-        "On-Demand": "Do you require signed URLs for content security? (Yes/No)"
-    },
-    "Do you need an SSL certificate? (Yes/No)": {
-        "Yes": "Would you like to use AWS Certificate Manager (ACM) for SSL provisioning? (Yes/No)"
-    },
-    "Do you want to enable gzip/brotli compression? (Yes/No)": {
-        "Yes": "What compression formats do you prefer? (Gzip, Brotli, Both)"
-    },
-    "Do you need IP or region-based access restrictions? (Yes/No)": {
-        "Yes": "Please specify the IPs or regions to allow/block."
-    },
-    "Do you need AWS WAF protection? (Yes/No)": {
-        "Yes": "Would you like predefined security rules or custom rule configuration? (Predefined, Custom)"
-    },
-    "Do you want to enable access logging? (Yes/No)": {
-        "Yes": "Please provide the S3 bucket name for storing logs."
-    },
-    "Do you want cost optimization suggestions? (Yes/No)": {
-        "Yes": "Should we prioritize fewer edge locations to reduce costs? (Yes/No)"
-    },
-    "Do you want to configure custom error pages? (Yes/No)": {
-        "Yes": "Please specify the URLs for different error codes (404, 500, etc.)."
-    }
-}
-
-# Streamlit UI
-st.title("CloudFront Configuration Chatbot")
-st.write("This chatbot will dynamically guide you through CloudFront configuration.")
-
-if not st.session_state["completed"]:
-    question = st.session_state["current_question"]
-    user_input = st.text_input(question, key="current")
+                                            ### Task Breakdown:
+                                        1. **Collect Information**: Ask the user for the following parameters systematically:
+                                           - Full Name
+                                           - Email Address
+                                           - Phone Number
+                                           - Location (City, State, Country)
+                                           - Preferred Language
+                                           - Purpose of Inquiry
+                                           - Preferred Contact Method (Email/Phone)
+                                           - Budget Range (if applicable)
+                                           - Industry/Field of Work
+                                           - Additional Custom Input (Optional)
+                                        
+                                        2. **User-Friendly Interaction**:
+                                           - Guide the user conversationally, asking one question at a time.
+                                           - Validate responses where necessary (e.g., email format, phone number format).
+                                           - Allow corrections if the user wants to change any input.
+                                        
+                                        3. **Generate Output in Amazon CloudFront JSON Format**:
+                                           - Ensure the collected data is structured as JSON and formatted for CloudFront.
+                                           - Use the following JSON structure:
+                                           ```json
+                                           {
+                                              "user_info": {
+                                                 "full_name": "John Doe",
+                                                 "email": "john.doe@example.com",
+                                                 "phone": "+1-555-123-4567",
+                                                 "location": {
+                                                    "city": "New York",
+                                                    "state": "NY",
+                                                    "country": "USA"
+                                                 },
+                                                 "language": "English",
+                                                 "inquiry_purpose": "Product Inquiry",
+                                                 "contact_method": "Email",
+                                                 "budget_range": "$500 - $1000",
+                                                 "industry": "Technology",
+                                                 "additional_info": "Looking for cloud hosting services"
+                                              },
+                                              "cdn_meta": {
+                                                 "cdn_provider": "Amazon CloudFront",
+                                                 "distribution_id": "ABC123XYZ",
+                                                 "status": "Success",
+                                                 "timestamp": "2025-01-05T12:00:00Z"
+                                              }
+                                           }
+                                        "}''',
+                {"role": "user", "content": user_input}]
+                                            )
+    return response["choices"][0].message.content
+def collect_user_info():
+    """Streamlit app interface to collect user input and display ChatGPT response."""
+    st.title("🤖 AI Chatbot - Data Collection")
+    st.write("Please provide the required information below:")
     
-    if st.button("Next") and user_input:
-        # Store response
-        st.session_state["responses"][question] = user_input
+    user_input = st.text_area("Enter your details here:")
+    
+    if st.button("Submit Information"):
+        chatgpt_output = get_chatgpt_response(user_input)
         
-        # Determine next question dynamically
-        if question in question_flow and user_input in question_flow[question]:
-            st.session_state["current_question"] = question_flow[question][user_input]
-        else:
-            st.session_state["completed"] = True
+        # Display response
+        st.success("✅ Chatbot Response:")
+        st.write(chatgpt_output)
         
-        st.rerun()
-else:
-    st.write("### Configuration Summary:")
-    st.json(st.session_state["responses"])
-    
-    # Save responses to JSON file
-    with open("cloudfront_config.json", "w") as f:
-        json.dump(st.session_state["responses"], f, indent=4)
-    st.success("Configuration saved as cloudfront_config.json")
-    
-    if st.button("Restart Configuration"):
-        st.session_state["responses"] = {}
-        st.session_state["current_question"] = "What will you be using CloudFront for?"
-        st.session_state["completed"] = False
-        st.rerun()
+        # Provide JSON download button
+        output_json = {
+            "user_input": user_input,
+            "chatbot_response": chatgpt_output,
+            "cdn_meta": {
+                "cdn_provider": "Amazon CloudFront",
+                "distribution_id": "ABC123XYZ",
+                "status": "Success",
+                "timestamp": datetime.utcnow().isoformat() + "Z"
+            }
+        }
+        json_str = json.dumps(output_json, indent=4)
+        st.download_button(
+            label="Download JSON File",
+            data=json_str,
+            file_name="chatbot_response.json",
+            mime="application/json"
+        )
+
+if __name__ == "__main__":
+    collect_user_info()
