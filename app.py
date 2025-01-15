@@ -129,7 +129,7 @@ if prompt := st.chat_input("Type your message here..."):
 
     # Function to generate assistant response
     def generate_response():
-        response = openai.ChatCompletion.create(
+        response = openai.chat.completions.create(
             model="gpt-4",
             messages=st.session_state.messages,
             functions=functions
