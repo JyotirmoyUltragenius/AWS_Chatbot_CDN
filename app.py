@@ -129,7 +129,7 @@ if prompt := st.chat_input("Type your message here..."):
 
     # Function to generate assistant response
     def generate_response():
-        response = openai.chat.completions.create(
+        response = openai.ChatCompletion.create(
             model="gpt-4",
             messages=st.session_state.messages,
             functions=functions
@@ -139,35 +139,6 @@ if prompt := st.chat_input("Type your message here..."):
     # Generate assistant response
     with st.chat_message("assistant"):
         message = generate_response()
-        st.markdown(message["content"])
+        st.markdown(message.content)  # Use dot notation to access 'content'
         # Add assistant response to chat history
-        st.session_state.messages.append({"role": "assistant", "content": message["content"]})
-
-    
-    message_dict = response.choices[0].message.model_dump()
-    
-    if message_dict.get("function_call") is not None:
-        function_call = message_dict["function_call"]
-        if function_call["name"] == "collect_cdn_technical_info":
-            user_info = json.loads(function_call["arguments"])
-            
-            output = {
-                "user_info": user_info,
-                "cdn_meta": {
-                    "cdn_provider": "Amazon CloudFront",
-                    "distribution_id": "ABC123XYZ",
-                    "status": "Success",
-                    "timestamp": datetime.utcnow().isoformat() + "Z"
-                }
-            }
-            response_text = json.dumps(output, indent=4)
-        else:
-            response_text = "Function call not recognized."
-    else:
-        response_text = message_dict["content"]
-    
-    st.session_state.chat_history.append({"role": "assistant", "content": response_text})
-    st.session_state.messages.append({"role": "assistant", "content": response_text})
-    
-    with st.chat_message("assistant"):
-        st.markdown(response_text)
+        st.session_state.messages.append({"role": "assistant", "content": message.content})
