@@ -103,33 +103,48 @@ messages = [
     }
 ]
 
+
+# Initialize session state for chat history
+if "messages" not in st.session_state:
+    st.session_state.messages = [
+        {"role": "system", "content": "You are an intelligent data-collecting chatbot designed to interact with users to gather information on at least 10 key parameters. Guide the user through a structured conversation, ensuring that all necessary details are collected. The final output should be formatted in JSON, optimized for use with Amazon CloudFront CDN."}
+    ]
+
+# Streamlit app layout
 st.title("CDN Optimization Chatbot")
 st.write("Chat with this AI to collect CDN deployment requirements.")
 
-if 'chat_history' not in st.session_state:
-    st.session_state.chat_history = []
-if 'messages' not in st.session_state:
-    st.session_state.messages = []
-    st.session_state.chat_history = []
-if 'messages' not in st.session_state:
-    st.session_state.messages = messages
-    st.session_state.chat_history = []
+# Display chat messages from history on app rerun
+for message in st.session_state.messages:
+    with st.chat_message(message["role"]):
+        st.markdown(message["content"])
 
-for message in st.session_state.chat_history:
-    with st.chat_message(message['role']):
-        st.markdown(message['content'])
+# Accept user input
+if prompt := st.chat_input("Type your message here..."):
+    # Add user message to chat history
+    st.session_state.messages.append({"role": "user", "content": prompt})
+    # Display user message in chat message container
+    with st.chat_message("user"):
+        st.markdown(prompt)
 
-user_input = st.chat_input("Type your message here...")
+    # Function to generate assistant response
+    def generate_response():
+        response = openai.chat.completions.create(
+            model="gpt-4",
+            messages=st.session_state.messages,
+            functions=functions
+        )
+        return response.choices[0].message
 
-if user_input:
-    st.session_state.messages.append({"role": "user", "content": user_input})
-    st.session_state.chat_history.append({"role": "user", "content": user_input})
-    
-    response = openai.chat.completions.create(
-        model="gpt-4",
-        messages=st.session_state.messages,
-        functions=functions
-    )
+    # Generate assistant response
+    with st.chat_message("assistant"):
+        message = generate_response()
+        st.markdown(message["content"])
+        # Add assistant response to chat history
+        st.session_state.messages.append({"role": "assistant", "content": message["content"]})
+4. Run the Application
+
+Execute the following comma
     
     message_dict = response.choices[0].message.model_dump()
     
