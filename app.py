@@ -109,9 +109,10 @@ functions = [
 
 
 # Define system message
-# Define system message
-messages = [
-    {
+
+if "messages" not in st.session_state:
+    st.session_state.messages = [
+        {
         "role": "system",
         "content": (
             "You are an intelligent chatbot designed to guide users in setting up an optimized AWS CloudFront CDN. "
@@ -146,12 +147,8 @@ messages = [
             "- Ensure all parameters align with AWS best practices and provide final recommendations."
         )
     }
-]
+    ]
 
-
-# Initialize session state for chat history
-if "messages" not in st.session_state:
-    st.session_state.messages = [{"role": "user", "content": messages}]
 
 # Streamlit app layout
 st.title("CDN Optimization Chatbot")
