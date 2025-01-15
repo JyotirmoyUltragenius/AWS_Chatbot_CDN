@@ -149,9 +149,9 @@ messages = [
 
 # Initialize session state for chat history
 if "messages" not in st.session_state:
-    st.session_state.messages = [messages]
-
-
+    st.session_state.messages = [
+        {"role": "system", "content": "You are an intelligent data-collecting chatbot designed to interact with users to gather information on at least 10 key parameters. Guide the user through a structured conversation ask questions one by one, ensuring that all necessary details are collected. The final output should be formatted in JSON, optimized for use with Amazon CloudFront CDN."}
+    ]
 # Streamlit app layout
 st.title("CDN Optimization Chatbot")
 st.write("Chat with this AI to collect CDN deployment requirements.")
