@@ -2,6 +2,7 @@ import openai
 import json
 import streamlit as st
 from datetime import datetime
+from openai import OpenAIError
 
 api_key = str(st.secrets["API_KEY"].strip())
 if api_key:
