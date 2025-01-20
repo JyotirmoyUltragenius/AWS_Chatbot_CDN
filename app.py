@@ -201,18 +201,32 @@ if prompt := st.chat_input("Type your message here..."):
     with st.chat_message("user"):
         st.markdown(prompt)
 
-    # Function to generate assistant response
-    def generate_response():
+# Function to generate assistant response
+def generate_response():
+    try:
         response = openai.chat.completions.create(
             model="gpt-4",
             messages=st.session_state.messages,
             functions=functions
         )
-        return response.choices[0].message
+        # Check if the response has valid content
+        generated_message = response.choices[0].message
+        if generated_message and generated_message.get("content"):
+            return generated_message
+        else:
+            st.error("The assistant generated an invalid response. Please try again.")
+            return {"role": "assistant", "content": "I'm sorry, something went wrong. Can you please repeat that?"}
+    except openai.error.OpenAIError as e:
+        st.error(f"An error occurred: {e}")
+        return {"role": "assistant", "content": "I'm sorry, I encountered an error. Can you try again?"}
 
-    # Generate assistant response
-    with st.chat_message("assistant"):
-        message = generate_response()
-        st.markdown(message.content)  # Use dot notation to access 'content'
+# Generate assistant response
+with st.chat_message("assistant"):
+    message = generate_response()
+    if message and message.get("content"):
+        st.markdown(message["content"])
         # Add assistant response to chat history
-        st.session_state.messages.append({"role": "assistant", "content": message.content})
+        st.session_state.messages.append(message)
+    else:
+        st.error("Failed to generate a valid response.")
+
