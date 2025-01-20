@@ -205,19 +205,40 @@ if prompt := st.chat_input("Type your message here..."):
 # Function to generate assistant response
 def generate_response():
     try:
-        response = openai.chat.completions.create(
+        response = openai.ChatCompletion.create(
             model="gpt-4",
             messages=st.session_state.messages,
             functions=functions
         )
-        # Check if the response has valid content
-        generated_message = response.choices[0].message
-        if generated_message and generated_message.get("content"):
-            return generated_message
+        # Convert the response message to a dictionary
+        message_dict = response.choices[0].message.model_dump()
+
+        # Check if a function call exists in the response
+        if message_dict.get("function_call") is not None:
+            function_call = message_dict["function_call"]
+            if function_call["name"] == "collect_cdn_technical_info":
+                # Parse the arguments from the function call
+                cdn_info = json.loads(function_call["arguments"])
+
+                # Construct the output JSON
+                output = {
+                    "cdn_info": cdn_info,
+                    "cdn_meta": {
+                        "cdn_provider": "Amazon CloudFront",
+                        "distribution_id": "ABC123XYZ",
+                        "status": "Success",
+                        "timestamp": datetime.utcnow().isoformat() + "Z"
+                    }
+                }
+
+                # Display output in a structured format
+                st.json(output)  # Streamlit-friendly output
+                print("Chatbot:", json.dumps(output, indent=4))  # Debugging
+                return {"role": "assistant", "content": "CDN information has been successfully collected and displayed."}
         else:
-            st.error("The assistant generated an invalid response. Please try again.")
-            return {"role": "assistant", "content": "I'm sorry, something went wrong. Can you please repeat that?"}
-    except openai.OpenAIError as e:
+            # Default assistant response
+            return message_dict
+    except openai.error.OpenAIError as e:
         st.error(f"An error occurred: {e}")
         return {"role": "assistant", "content": "I'm sorry, I encountered an error. Can you try again?"}
 
@@ -230,4 +251,3 @@ with st.chat_message("assistant"):
         st.session_state.messages.append(message)
     else:
         st.error("Failed to generate a valid response.")
-
