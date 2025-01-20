@@ -217,7 +217,7 @@ def generate_response():
         else:
             st.error("The assistant generated an invalid response. Please try again.")
             return {"role": "assistant", "content": "I'm sorry, something went wrong. Can you please repeat that?"}
-    except openai.error.OpenAIError as e:
+    except openai.OpenAIError as e:
         st.error(f"An error occurred: {e}")
         return {"role": "assistant", "content": "I'm sorry, I encountered an error. Can you try again?"}
 
