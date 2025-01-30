@@ -142,7 +142,6 @@ if prompt := st.chat_input("Type your message here..."):
         st.markdown(message["content"])
         # Add assistant response to chat history
         st.session_state.messages.append({"role": "assistant", "content": message["content"]})
-4. Run the Application
 
 Execute the following comma
     
