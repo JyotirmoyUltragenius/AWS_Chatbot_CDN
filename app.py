@@ -2,7 +2,6 @@ import openai
 import json
 import streamlit as st
 from datetime import datetime
-from openai import OpenAIError
 
 api_key = str(st.secrets["API_KEY"].strip())
 if api_key:
@@ -202,52 +201,18 @@ if prompt := st.chat_input("Type your message here..."):
     with st.chat_message("user"):
         st.markdown(prompt)
 
-# Function to generate assistant response
-def generate_response():
-    try:
-        response = openai.ChatCompletion.create(
+    # Function to generate assistant response
+    def generate_response():
+        response = openai.chat.completions.create(
             model="gpt-4",
             messages=st.session_state.messages,
             functions=functions
         )
-        # Convert the response message to a dictionary
-        message_dict = response.choices[0].message.model_dump()
+        return response.choices[0].message
 
-        # Check if a function call exists in the response
-        if message_dict.get("function_call") is not None:
-            function_call = message_dict["function_call"]
-            if function_call["name"] == "collect_cdn_technical_info":
-                # Parse the arguments from the function call
-                cdn_info = json.loads(function_call["arguments"])
-
-                # Construct the output JSON
-                output = {
-                    "cdn_info": cdn_info,
-                    "cdn_meta": {
-                        "cdn_provider": "Amazon CloudFront",
-                        "distribution_id": "ABC123XYZ",
-                        "status": "Success",
-                        "timestamp": datetime.utcnow().isoformat() + "Z"
-                    }
-                }
-
-                # Display output in a structured format
-                st.json(output)  # Streamlit-friendly output
-                print("Chatbot:", json.dumps(output, indent=4))  # Debugging
-                return {"role": "assistant", "content": "CDN information has been successfully collected and displayed."}
-        else:
-            # Default assistant response
-            return message_dict
-    except openai.error.OpenAIError as e:
-        st.error(f"An error occurred: {e}")
-        return {"role": "assistant", "content": "I'm sorry, I encountered an error. Can you try again?"}
-
-# Generate assistant response
-with st.chat_message("assistant"):
-    message = generate_response()
-    if message and message.get("content"):
-        st.markdown(message["content"])
+    # Generate assistant response
+    with st.chat_message("assistant"):
+        message = generate_response()
+        st.markdown(message.content)  # Use dot notation to access 'content'
         # Add assistant response to chat history
-        st.session_state.messages.append(message)
-    else:
-        st.error("Failed to generate a valid response.")
+        st.session_state.messages.append({"role": "assistant", "content": message.content})
