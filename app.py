@@ -143,7 +143,6 @@ if prompt := st.chat_input("Type your message here..."):
         # Add assistant response to chat history
         st.session_state.messages.append({"role": "assistant", "content": message["content"]})
 
-Execute the following comma
     
     message_dict = response.choices[0].message.model_dump()
     
