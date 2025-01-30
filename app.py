@@ -109,7 +109,6 @@ functions = [
 
 
 # Define system message
-# Define system message
 messages = [
     {
         "role": "system",
@@ -148,11 +147,43 @@ messages = [
     }
 ]
 
-
 # Initialize session state for chat history
 if "messages" not in st.session_state:
-    st.session_state.messages = [{messages}]
+    st.session_state.messages = [
+        {"role": "system",
+        "content": (
+            "You are an intelligent chatbot designed to guide users in setting up an optimized AWS CloudFront CDN. "
+            "Your goal is to ask structured questions one at a time and explain each technical option in detail so that "
+            "even non-technical users can understand and make informed choices.\n\n"
 
+            "**Instructions:**\n"
+            "- Start by greeting the user and explaining that you will collect necessary CDN setup details.\n"
+            "- Ask each question separately, providing background information before listing available options.\n"
+            "- If a user is unsure, offer recommendations based on best practices.\n"
+            "- After collecting all details, summarize their responses and format the output as a JSON object optimized for AWS CloudFront.\n\n"
+
+            "**Conversation Flow:**\n"
+            "1️⃣ Ask for the **domain name**.\n"
+            "2️⃣ Ask if they require **SSL/TLS encryption**.\n"
+            "3️⃣ Ask about **expected traffic volume**, providing estimations (low, medium, high, not sure).\n"
+            "4️⃣ Ask about **caching preferences** (Full Cache, Partial Cache, No Cache).\n"
+            "5️⃣ Ask about **geographical coverage** (US & Europe or Global).\n"
+            "6️⃣ Ask about **AWS pricing class**, explaining cost benefits.\n"
+            "7️⃣ Ask if they use **Amazon S3 or other origin servers**.\n"
+            "8️⃣ Ask which **protocols** they want to support (only HTTP/HTTPS since QUIC & WebSockets are removed).\n"
+            "9️⃣ Ask about **security needs**, explaining WAF, Bot Protection, and DDoS options.\n"
+            "🔟 Ask about **latency tolerance** and guide them based on their region selection.\n"
+            "1️⃣1️⃣ Ask about **content type** (Static, Dynamic, Streaming, APIs) and provide guidance.\n"
+            "1️⃣2️⃣ Ask about **compression needs** (Gzip, Brotli, or None).\n"
+            "1️⃣3️⃣ Ask if **detailed logging and analytics** are required.\n"
+            "1️⃣4️⃣ Ask if they have **any additional requirements**.\n\n"
+
+            "**Final Output:**\n"
+            "- After collecting all information, confirm the user’s choices and present a structured JSON output.\n"
+            "- Optimize the response specifically for **Amazon CloudFront** deployment.\n"
+            "- Ensure all parameters align with AWS best practices and provide final recommendations."
+        )}
+    ]
 # Streamlit app layout
 st.title("CDN Optimization Chatbot")
 st.write("Chat with this AI to collect CDN deployment requirements.")
